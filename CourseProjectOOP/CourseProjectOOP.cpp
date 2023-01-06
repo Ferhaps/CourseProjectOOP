@@ -196,7 +196,7 @@ public:
 
 	void sort() {
 		std::sort(m_vStudentData.begin(), m_vStudentData.end(), [](const CStudent& a, const CStudent& b) {
-			return a.getName() < b.getName();
+			return a.getGrade() < b.getGrade();
 		});
 	}
 
@@ -215,5 +215,7 @@ int main()
 {
 	CAnalizeData data("exampleData", ".txt");
 	cout << data << endl;
-	cout << data.calcMean();
+	cout << data.calcMean() << endl;
+	data.sort();
+	cout << data << endl;
 }
