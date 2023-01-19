@@ -1,7 +1,7 @@
 #include <string>
 #include <iostream>
 #include <fstream>
-#include<vector>
+#include <vector>
 #include <algorithm>
 
 using namespace std;
@@ -45,6 +45,10 @@ public:
 	{
 		return grade < s.getGrade();
 	}
+	/*friend bool operator < (const CStudent& a, const CStudent& s)
+	{
+		return a.getGrade() < s.getGrade();
+	}*/
 	bool operator == (const CStudent& s) const
 	{
 		return fakNumber == s.fakNumber;
@@ -81,7 +85,7 @@ public:
 		return in;
 	}
 
-	friend ostream& operator << (ostream& out, CStudent& s)
+	friend ostream& operator << (ostream& out, const CStudent& s)
 	{
 		return s.output(out);
 	}
@@ -92,47 +96,6 @@ public:
 	}
 };
 
-CStudent createStudent(const string& line) {
-	string studentName = "";
-	string studentFakNumber = "";
-	string grade = "";
-
-	int spaceCounter = 0;
-	string currentWord = "";
-	for (int i = 0; i < line.length(); i++)
-	{
-		char c = line[i];
-		if (c == ' ' || i == line.length() - 1)
-		{
-			switch (spaceCounter)
-			{
-			case 0: {
-				studentName = currentWord;
-				break;
-			}
-			case 1: {
-				studentFakNumber = currentWord;
-				break;
-			}
-			case 2: {
-				currentWord = currentWord + c;
-				grade = currentWord;
-				break;
-			}
-			default:
-				break;
-			}
-			spaceCounter++;
-			currentWord = "";
-			continue;
-		}
-		currentWord = currentWord + c;
-	}
-
-	double gradeAsNumber = stod(grade);
-	CStudent newStudent(studentName, studentFakNumber, gradeAsNumber);
-	return newStudent;
-}
 
 class CAnalizeData {
 private:
@@ -142,26 +105,22 @@ private:
 public:
 	CAnalizeData(const string& tFileName, const string& tFileExtension) {
 		string file = tFileName + tFileExtension;
-		string line;
 		ifstream myfile(file);
 		if (myfile.is_open())
 		{
 			int counter = -1;
-			while (getline(myfile, line))
+			myfile >> m_strCourse;
+			while (!myfile.eof())
 			{
-				counter++;
-				if (counter == 0)
-				{
-					m_strCourse = line;
-					continue;
-				}
-
-				CStudent newStudent = createStudent(line);
+				CStudent newStudent;
+				myfile >> newStudent;
 				m_vStudentData.push_back(newStudent);
 			}
 			myfile.close();
 		}
-		else cout << "Unable to open file";
+		else {
+			throw runtime_error("Unable to open file");
+		};
 	}
 	CAnalizeData(const vector<CStudent>& tStudentData) {
 		m_vStudentData = tStudentData;
@@ -169,7 +128,7 @@ public:
 	const string& getCourse() const {
 		return m_strCourse;
 	}
-	void Course(string newCourse) {
+	void setCourse(string newCourse) {
 		m_strCourse = newCourse;
 	}
 	const vector<CStudent>& getStudentData() const {
@@ -188,7 +147,7 @@ public:
 		return out;
 	}
 
-	friend ostream& operator<<(ostream& out, const CAnalizeData& obj)
+	friend ostream& operator << (ostream& out, const CAnalizeData& obj)
 	{
 		obj.output(out);
 		return out;
@@ -213,9 +172,17 @@ public:
 
 int main()
 {
-	CAnalizeData data("exampleData", ".txt");
-	cout << data << endl;
-	cout << data.calcMean() << endl;
-	data.sort();
-	cout << data << endl;
+	try
+	{
+		CAnalizeData data("exampleData", ".txt");
+		cout << data << endl;
+		cout << data.calcMean() << endl;
+		data.sort();
+
+		cout << data << endl;
+	}
+	catch (const runtime_error& e)
+	{
+		cout << "Standard exception: " << e.what() << endl;
+	}
 }
